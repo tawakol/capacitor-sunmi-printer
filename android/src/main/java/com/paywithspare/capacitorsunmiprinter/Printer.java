@@ -35,6 +35,12 @@ public class Printer {
      */
     private SunmiPrinterService sunmiPrinterService;
 
+    private static Printer helper = new Printer();
+     private void Printer() {}
+     public static Printer getInstance() {
+         return helper;
+     }
+
     public enum Alignment {
         LEFT(0),
         CENTER(1),
@@ -75,20 +81,17 @@ public class Printer {
         }
     }
 
-// private static SunmiPrintHelper helper = new Printer();
-// private void SunmiPrintHelper() {}
-// public static SunmiPrintHelper getInstance() {
-//     return helper;
-// }
     private InnerPrinterCallback innerPrinterCallback = new InnerPrinterCallback() {
         @Override
         protected void onConnected(SunmiPrinterService service) {
+            Log.i("Printer", "onConnected");
             sunmiPrinterService = service;
             checkSunmiPrinterService(service);
         }
 
         @Override
         protected void onDisconnected() {
+            Log.i("Printer", "onDisconnected");
             sunmiPrinterService = null;
             sunmiPrinter = LostSunmiPrinter;
         }
@@ -128,6 +131,8 @@ public class Printer {
             if (!ret) {
                 sunmiPrinter = NoSunmiPrinter;
             }
+
+            Log.i("Printer", "initSunmiPrinterService called");
         } catch (InnerPrinterException e) {
             e.printStackTrace();
         }
@@ -259,7 +264,6 @@ public class Printer {
             handleRemoteException(e);
         }
     }
-
     /**
      * Open cash box This method can be used on Sunmi devices with a cash drawer
      * interface If there is no cash box (such as V1、P1) or the call fails, an
@@ -283,5 +287,6 @@ public class Printer {
 
     private void handleRemoteException(RemoteException e) {
         //TODO process when get one exception
+        Log.e("Printer", "RemoteException occurred: " + e.getMessage());
     }
 }
