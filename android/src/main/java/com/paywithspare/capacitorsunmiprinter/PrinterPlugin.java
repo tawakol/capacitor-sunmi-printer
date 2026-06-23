@@ -60,6 +60,70 @@ public class PrinterPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void sendRAWData(PluginCall call) {
+        String base64Data = call.getString("base64Data", "");
+        try {
+            implementation.sendRAWData(base64Data);
+            call.resolve();
+        } catch (Exception e) {
+            call.reject("Failed to send raw printer data", e);
+        }
+    }
+
+    @PluginMethod
+    public void enterPrinterBuffer(PluginCall call) {
+        boolean clean = Boolean.TRUE.equals(call.getBoolean("clean", true));
+        try {
+            implementation.enterPrinterBuffer(clean);
+            call.resolve();
+        } catch (Exception e) {
+            call.reject("Failed to enter printer buffer", e);
+        }
+    }
+
+    @PluginMethod
+    public void exitPrinterBuffer(PluginCall call) {
+        boolean commit = Boolean.TRUE.equals(call.getBoolean("commit", true));
+        try {
+            implementation.exitPrinterBuffer(commit);
+            call.resolve();
+        } catch (Exception e) {
+            call.reject("Failed to exit printer buffer", e);
+        }
+    }
+
+    @PluginMethod
+    public void commitPrinterBuffer(PluginCall call) {
+        try {
+            implementation.commitPrinterBuffer();
+            call.resolve();
+        } catch (Exception e) {
+            call.reject("Failed to commit printer buffer", e);
+        }
+    }
+
+    @PluginMethod
+    public void cutPaper(PluginCall call) {
+        try {
+            implementation.cutPaper();
+            call.resolve();
+        } catch (Exception e) {
+            call.reject("Failed to cut paper", e);
+        }
+    }
+
+    @PluginMethod
+    public void lineWrap(PluginCall call) {
+        int lines = call.getInt("lines", 1);
+        try {
+            implementation.lineWrap(lines);
+            call.resolve();
+        } catch (Exception e) {
+            call.reject("Failed to feed lines", e);
+        }
+    }
+
+    @PluginMethod
     public void setPrinterAlignment(PluginCall call) {
         String alignment = call.getString("alignment", "left");
         try {

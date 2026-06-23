@@ -1,6 +1,7 @@
 package com.paywithspare.capacitorsunmiprinter;
 
 import android.os.RemoteException;
+import android.util.Base64;
 import android.util.Log;
 import android.content.Context;
 import android.os.Bundle;
@@ -234,6 +235,125 @@ public class Printer {
 
         try {
             sunmiPrinterService.printText(text, innerPrinterResultCallback);
+        } catch (RemoteException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    /**
+     * Send raw ESC/POS bytes (passed as a Base64 string) straight to the printer.
+     *
+     * IMPORTANT: On Sunmi devices, raw data is only committed to the print head
+     * when it is wrapped in a printer buffer transaction:
+     *
+     *   enterPrinterBuffer(true)  -> sendRAWData(...) -> exitPrinterBuffer(true)
+     *
+     * Calling sendRAWData on its own (outside a buffer) is accepted by the AIDL
+     * service but silently discarded, which is why raw printing appears blank.
+     *
+     * Reference to
+     * https://docs.sunmi.com/general-function-modules/external-device-debug/printer-driver/
+     */
+    public void sendRAWData(String base64Data) {
+        if (sunmiPrinterService == null) {
+            //TODO Service disconnection processing
+            return;
+        }
+
+        if (base64Data == null || base64Data.isEmpty()) {
+            Log.e("Printer", "Raw printer data cannot be empty");
+            return;
+        }
+
+        try {
+            byte[] data = Base64.decode(base64Data, Base64.DEFAULT);
+            sunmiPrinterService.sendRAWData(data, innerPrinterResultCallback);
+        } catch (IllegalArgumentException e) {
+            Log.e("Printer", "Invalid raw printer data: " + e.getMessage());
+        } catch (RemoteException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    /**
+     * Open the printer buffer. While the buffer is open, subsequent print
+     * commands are queued instead of printed immediately. Pass clean=true to
+     * discard any content left over from a previous, uncommitted transaction.
+     */
+    public void enterPrinterBuffer(boolean clean) {
+        if (sunmiPrinterService == null) {
+            //TODO Service disconnection processing
+            return;
+        }
+
+        try {
+            sunmiPrinterService.enterPrinterBuffer(clean);
+        } catch (RemoteException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    /**
+     * Close the printer buffer. Pass commit=true to flush all queued commands
+     * to the print head; commit=false discards the buffered content.
+     */
+    public void exitPrinterBuffer(boolean commit) {
+        if (sunmiPrinterService == null) {
+            //TODO Service disconnection processing
+            return;
+        }
+
+        try {
+            sunmiPrinterService.exitPrinterBuffer(commit);
+        } catch (RemoteException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    /**
+     * Flush the queued commands to the print head without closing the buffer,
+     * allowing more commands to be appended to the same transaction afterwards.
+     */
+    public void commitPrinterBuffer() {
+        if (sunmiPrinterService == null) {
+            //TODO Service disconnection processing
+            return;
+        }
+
+        try {
+            sunmiPrinterService.commitPrinterBuffer();
+        } catch (RemoteException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    /**
+     * Cut the paper (only effective on devices with a cutter).
+     */
+    public void cutPaper() {
+        if (sunmiPrinterService == null) {
+            //TODO Service disconnection processing
+            return;
+        }
+
+        try {
+            sunmiPrinterService.cutPaper(innerPrinterResultCallback);
+        } catch (RemoteException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    /**
+     * Feed paper by printing the given number of blank lines.
+     */
+    public void lineWrap(int count) {
+        if (sunmiPrinterService == null) {
+            //TODO Service disconnection processing
+            return;
+        }
+
+        try {
+            sunmiPrinterService.lineWrap(count, innerPrinterResultCallback);
         } catch (RemoteException e) {
             handleRemoteException(e);
         }

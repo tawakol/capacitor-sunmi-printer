@@ -39,4 +39,32 @@ export class PrinterWeb extends WebPlugin implements PrinterPlugin {
     console.log('Setting font size:', options.fontSize);
     throw new Error('No web implementation, please run the application on a Sunmi Android device');
   }
+
+  async sendRAWData(options: { base64Data: string }): Promise<void> {
+    console.log('Sending raw data, length:', options.base64Data?.length ?? 0);
+    throw new Error('No web implementation, please run the application on a Sunmi Android device');
+  }
+
+  async enterPrinterBuffer(options?: { clean?: boolean }): Promise<void> {
+    console.log('Entering printer buffer, clean:', options?.clean ?? true);
+    throw new Error('No web implementation, please run the application on a Sunmi Android device');
+  }
+
+  async exitPrinterBuffer(options?: { commit?: boolean }): Promise<void> {
+    console.log('Exiting printer buffer, commit:', options?.commit ?? true);
+    throw new Error('No web implementation, please run the application on a Sunmi Android device');
+  }
+
+  async commitPrinterBuffer(): Promise<void> {
+    throw new Error('No web implementation, please run the application on a Sunmi Android device');
+  }
+
+  async cutPaper(): Promise<void> {
+    throw new Error('No web implementation, please run the application on a Sunmi Android device');
+  }
+
+  async lineWrap(options: { lines: number }): Promise<void> {
+    console.log('Line wrap, lines:', options.lines);
+    throw new Error('No web implementation, please run the application on a Sunmi Android device');
+  }
 }
