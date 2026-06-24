@@ -2,11 +2,17 @@ package com.paywithspare.capacitorsunmiprinter;
 
 import android.content.Context;
 
+import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.List;
 
 @CapacitorPlugin(name = "Printer")
 public class PrinterPlugin extends Plugin {
@@ -120,6 +126,45 @@ public class PrinterPlugin extends Plugin {
             call.resolve();
         } catch (Exception e) {
             call.reject("Failed to feed lines", e);
+        }
+    }
+
+    @PluginMethod
+    public void printColumnsString(PluginCall call) {
+        JSArray columns = call.getArray("columns");
+        if (columns == null) {
+            call.reject("columns is required");
+            return;
+        }
+        try {
+            List<JSONObject> cols = columns.toList();
+            int n = cols.size();
+            String[] texts = new String[n];
+            int[] widths = new int[n];
+            int[] aligns = new int[n];
+            for (int i = 0; i < n; i++) {
+                JSONObject col = cols.get(i);
+                texts[i] = col.optString("text", "");
+                widths[i] = col.optInt("width", 1);
+                aligns[i] = col.optInt("align", 0);
+            }
+            implementation.printColumnsString(texts, widths, aligns);
+            call.resolve();
+        } catch (JSONException e) {
+            call.reject("Invalid columns payload", e);
+        } catch (Exception e) {
+            call.reject("Failed to print columns", e);
+        }
+    }
+
+    @PluginMethod
+    public void printBitmap(PluginCall call) {
+        String base64Image = call.getString("base64Image", "");
+        try {
+            implementation.printBitmap(base64Image);
+            call.resolve();
+        } catch (Exception e) {
+            call.reject("Failed to print bitmap", e);
         }
     }
 

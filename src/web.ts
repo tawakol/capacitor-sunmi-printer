@@ -67,4 +67,16 @@ export class PrinterWeb extends WebPlugin implements PrinterPlugin {
     console.log('Line wrap, lines:', options.lines);
     throw new Error('No web implementation, please run the application on a Sunmi Android device');
   }
+
+  async printColumnsString(options: {
+    columns: { text: string; width: number; align: 0 | 1 | 2 }[];
+  }): Promise<void> {
+    console.log('Print columns:', options.columns?.length ?? 0);
+    throw new Error('No web implementation, please run the application on a Sunmi Android device');
+  }
+
+  async printBitmap(options: { base64Image: string }): Promise<void> {
+    console.log('Print bitmap, length:', options.base64Image?.length ?? 0);
+    throw new Error('No web implementation, please run the application on a Sunmi Android device');
+  }
 }

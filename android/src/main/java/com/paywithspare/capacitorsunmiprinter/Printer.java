@@ -5,6 +5,8 @@ import android.util.Base64;
 import android.util.Log;
 import android.content.Context;
 import android.os.Bundle;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.PluginCall;
@@ -354,6 +356,61 @@ public class Printer {
 
         try {
             sunmiPrinterService.lineWrap(count, innerPrinterResultCallback);
+        } catch (RemoteException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    /**
+     * Print a table row using the device's native column layout.
+     *
+     * Column widths are *proportional weights* (not character counts), so the
+     * printer computes each column's pixel width from the weights — this keeps
+     * columns aligned even with the proportional Arabic font.
+     *
+     * @param colsTextArr  text for each column
+     * @param colsWidthArr proportional weight of each column
+     * @param colsAlign    alignment per column: 0 left, 1 center, 2 right
+     */
+    public void printColumnsString(String[] colsTextArr, int[] colsWidthArr, int[] colsAlign) {
+        if (sunmiPrinterService == null) {
+            //TODO Service disconnection processing
+            return;
+        }
+
+        try {
+            sunmiPrinterService.printColumnsString(colsTextArr, colsWidthArr, colsAlign, innerPrinterResultCallback);
+        } catch (RemoteException e) {
+            handleRemoteException(e);
+        }
+    }
+
+    /**
+     * Print a bitmap (decoded from a Base64-encoded PNG/JPEG). Lets the caller
+     * render text/layout pixel-perfectly (any font, exact RTL/alignment) in JS
+     * and hand the printer a finished image.
+     */
+    public void printBitmap(String base64Image) {
+        if (sunmiPrinterService == null) {
+            //TODO Service disconnection processing
+            return;
+        }
+
+        if (base64Image == null || base64Image.isEmpty()) {
+            Log.e("Printer", "Bitmap data cannot be empty");
+            return;
+        }
+
+        try {
+            byte[] data = Base64.decode(base64Image, Base64.DEFAULT);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+            if (bitmap == null) {
+                Log.e("Printer", "Failed to decode bitmap data");
+                return;
+            }
+            sunmiPrinterService.printBitmap(bitmap, innerPrinterResultCallback);
+        } catch (IllegalArgumentException e) {
+            Log.e("Printer", "Invalid bitmap data: " + e.getMessage());
         } catch (RemoteException e) {
             handleRemoteException(e);
         }

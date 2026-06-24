@@ -24,6 +24,20 @@ export interface PrinterPlugin {
   cutPaper: () => Promise<void>;
   /** Feed the given number of blank lines. */
   lineWrap: (options: {lines: number}) => Promise<void>;
+  /**
+   * Print a table row using the device's native column layout. Column widths are
+   * proportional weights (the printer computes pixel widths from them), so columns
+   * stay aligned even with the proportional Arabic font.
+   * align: 0 = left, 1 = center, 2 = right.
+   */
+  printColumnsString: (options: {
+    columns: { text: string; width: number; align: 0 | 1 | 2 }[];
+  }) => Promise<void>;
+  /**
+   * Print a Base64-encoded image (PNG/JPEG). Lets the caller render text/layout
+   * pixel-perfectly in JS (any font, exact RTL/alignment) and print it as an image.
+   */
+  printBitmap: (options: {base64Image: string}) => Promise<void>;
 }
 
 export const PrinterStatusTypes = {
