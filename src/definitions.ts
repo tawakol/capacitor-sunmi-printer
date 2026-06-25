@@ -7,6 +7,37 @@ export interface PrinterPlugin {
   printText: (options: {textToPrint: string}) => Promise<void>;
   setPrinterAlignment: (options: {alignment: 'left' | 'center' | 'right'}) => Promise<void>;
   setFontSize: (options: {fontSize: number}) => Promise<void>;
+  /**
+   * Send raw ESC/POS bytes (encoded as a Base64 string) to the printer.
+   *
+   * Must be wrapped in a buffer transaction to actually print:
+   *   enterPrinterBuffer -> sendRAWData -> exitPrinterBuffer.
+   */
+  sendRAWData: (options: {base64Data: string}) => Promise<void>;
+  /** Open the printer buffer. Pass clean=true (default) to discard leftover content. */
+  enterPrinterBuffer: (options?: {clean?: boolean}) => Promise<void>;
+  /** Close the printer buffer. Pass commit=true (default) to flush queued commands. */
+  exitPrinterBuffer: (options?: {commit?: boolean}) => Promise<void>;
+  /** Flush queued commands without closing the buffer. */
+  commitPrinterBuffer: () => Promise<void>;
+  /** Cut the paper (devices with a cutter only). */
+  cutPaper: () => Promise<void>;
+  /** Feed the given number of blank lines. */
+  lineWrap: (options: {lines: number}) => Promise<void>;
+  /**
+   * Print a table row using the device's native column layout. Column widths are
+   * proportional weights (the printer computes pixel widths from them), so columns
+   * stay aligned even with the proportional Arabic font.
+   * align: 0 = left, 1 = center, 2 = right.
+   */
+  printColumnsString: (options: {
+    columns: { text: string; width: number; align: 0 | 1 | 2 }[];
+  }) => Promise<void>;
+  /**
+   * Print a Base64-encoded image (PNG/JPEG). Lets the caller render text/layout
+   * pixel-perfectly in JS (any font, exact RTL/alignment) and print it as an image.
+   */
+  printBitmap: (options: {base64Image: string}) => Promise<void>;
 }
 
 export const PrinterStatusTypes = {
